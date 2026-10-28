@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "AttendanceTrackerApp": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7058;http://localhost:5058",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

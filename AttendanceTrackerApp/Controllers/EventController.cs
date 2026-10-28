@@ -71,7 +71,8 @@ public class EventController : Controller
             return NotFound();
         }
 
-        return GenerateQrImage($"event:{eventItem.Id}");
+        var payload = $"event:{eventItem.Id}";
+        return GenerateQrImage(payload);
     }
 
     private FileContentResult GenerateQrImage(string payload)

@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using AttendanceTrackerApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AttendanceTrackerApp.Data;
 
