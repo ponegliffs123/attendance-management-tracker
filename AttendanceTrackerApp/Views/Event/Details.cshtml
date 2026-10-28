@@ -1,0 +1,52 @@
+@model AttendanceTrackerApp.Models.EventItem
+
+@{
+    ViewData["Title"] = "Event Details";
+}
+
+<h2>@Model.Name</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <p><strong>Date:</strong> @Model.EventDate.ToString("ddd, dd MMM yyyy")</p>
+            <p><strong>Location:</strong> @Model.Location</p>
+            <p><strong>Description:</strong> @Model.Description</p>
+            <img src="@Url.Action("GenerateQr", "Event", new { id = Model.Id })" alt="Event QR" width="180" height="180" />
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <h4>Attendance</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Attendee</th>
+                    <th>Employee ID</th>
+                    <th>Check-In</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.AttendanceRecords.Any())
+                {
+                    @foreach (var record in Model.AttendanceRecords)
+                    {
+                        <tr>
+                            <td>@record.Attendee?.FullName</td>
+                            <td>@record.Attendee?.EmployeeId</td>
+                            <td>@record.CheckInTime.ToString("g")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3">No attendance recorded yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Back to events</a>

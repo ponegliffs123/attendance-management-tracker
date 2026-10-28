@@ -1,0 +1,145 @@
+@model AttendanceTrackerApp.Controllers.AttendanceDashboardViewModel
+
+@{
+    ViewData["Title"] = "Attendance Scanner";
+}
+
+<h2>Attendance Scanner</h2>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card p-3 mb-3">
+            <label for="selectedEvent">Select Event</label>
+            <select id="selectedEvent" class="form-select mb-3">
+                @foreach (var item in Model.Events)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            </select>
+
+            <label for="selectedAttendee">Select Attendee</label>
+            <select id="selectedAttendee" class="form-select mb-3">
+                @foreach (var item in Model.Attendees)
+                {
+                    <option value="@item.Id">@item.FullName (@item.EmployeeId)</option>
+                }
+            </select>
+
+            <button id="generateQrBtn" class="btn btn-primary mb-3">Generate QR Code</button>
+            <div id="qrPreview" class="text-center">
+                <img id="qrImage" src="" alt="Attendee QR" style="max-width: 200px; display:none;" />
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card p-3">
+            <h4>Scan QR Code</h4>
+            <div id="reader" style="width:100%; max-width: 500px; margin:0 auto;"></div>
+            <div id="scanMessage" class="mt-3 alert alert-info" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h4>Recent Attendance</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Attendee</th>
+            <th>Event</th>
+            <th>Check In</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Model.AttendanceRecords)
+        {
+            <tr>
+                <td>@record.Attendee?.FullName</td>
+                <td>@record.Event?.Name</td>
+                <td>@record.CheckInTime.ToString("g")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        const selectedEvent = document.getElementById('selectedEvent');
+        const selectedAttendee = document.getElementById('selectedAttendee');
+        const qrImage = document.getElementById('qrImage');
+        const scanMessage = document.getElementById('scanMessage');
+
+        function updateQrCode() {
+            const eventId = selectedEvent.value;
+            const attendeeId = selectedAttendee.value;
+
+            if (!eventId || !attendeeId) {
+                qrImage.style.display = 'none';
+                return;
+            }
+
+            const url = `/Attendance/GenerateAttendeeQr?eventId=${eventId}&attendeeId=${attendeeId}`;
+            qrImage.src = url;
+            qrImage.style.display = 'block';
+        }
+
+        document.getElementById('generateQrBtn').addEventListener('click', updateQrCode);
+        selectedEvent.addEventListener('change', updateQrCode);
+        selectedAttendee.addEventListener('change', updateQrCode);
+
+        const scanner = new Html5Qrcode('reader');
+
+        function onScanSuccess(decodedText, decodedResult) {
+            scanMessage.style.display = 'block';
+            scanMessage.className = 'mt-3 alert alert-info';
+            scanMessage.textContent = 'QR scanned. Saving attendance...';
+
+            fetch('/Attendance/RecordScan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ qrCode: decodedText })
+            })
+            .then(async response => {
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload || 'Unable to save attendance.');
+                }
+
+                scanMessage.className = 'mt-3 alert alert-success';
+                scanMessage.textContent = payload.message || 'Attendance saved successfully.';
+            })
+            .catch(error => {
+                scanMessage.className = 'mt-3 alert alert-danger';
+                scanMessage.textContent = error.message || 'Unable to save attendance.';
+            });
+        }
+
+        function onScanError(error) {
+            // No action needed; scanning continues.
+        }
+
+        Html5Qrcode.getCameras().then(cameras => {
+            if (cameras && cameras.length) {
+                scanner.start(
+                    { facingMode: 'environment' },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanError
+                ).catch(err => {
+                    scanMessage.style.display = 'block';
+                    scanMessage.className = 'mt-3 alert alert-warning';
+                    scanMessage.textContent = 'Unable to start camera. Please allow camera access.';
+                });
+            }
+        }).catch(() => {
+            scanMessage.style.display = 'block';
+            scanMessage.className = 'mt-3 alert alert-warning';
+            scanMessage.textContent = 'No camera found on this device.';
+        });
+    </script>
+}

@@ -1,0 +1,37 @@
+@model IEnumerable<AttendanceTrackerApp.Models.EventItem>
+
+@{
+    ViewData["Title"] = "Events";
+}
+
+<h2>Attendance Events</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Create Event</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>QR Code</th>
+            <th>Attendance</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
+                </td>
+                <td>@item.Location</td>
+                <td>@item.EventDate.ToString("ddd, dd MMM yyyy")</td>
+                <td>
+                    <img src="@Url.Action("GenerateQr", "Event", new { id = item.Id })" alt="QR Code" width="90" height="90" />
+                </td>
+                <td>@item.AttendanceRecords.Count()</td>
+            </tr>
+        }
+    </tbody>
+</table>
