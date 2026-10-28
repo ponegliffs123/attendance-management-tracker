@@ -1,11 +1,13 @@
 using AttendanceTrackerApp.Data;
 using AttendanceTrackerApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
 
 namespace AttendanceTrackerApp.Controllers;
 
+[Authorize]
 public class AttendanceController : Controller
 {
     private readonly AppDbContext _db;

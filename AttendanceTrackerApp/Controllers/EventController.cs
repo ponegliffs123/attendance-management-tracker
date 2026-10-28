@@ -1,11 +1,13 @@
 using AttendanceTrackerApp.Data;
 using AttendanceTrackerApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
 
 namespace AttendanceTrackerApp.Controllers;
 
+[Authorize]
 public class EventController : Controller
 {
     private readonly AppDbContext _db;
@@ -26,6 +28,7 @@ public class EventController : Controller
         return View(events);
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     public IActionResult Create()
     {
         return View();
@@ -33,6 +36,7 @@ public class EventController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Create(EventItem model)
     {
         if (!ModelState.IsValid)

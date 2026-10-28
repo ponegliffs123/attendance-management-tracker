@@ -1,10 +1,12 @@
 using AttendanceTrackerApp.Data;
 using AttendanceTrackerApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AttendanceTrackerApp.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly AppDbContext _db;

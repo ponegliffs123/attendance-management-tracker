@@ -1,10 +1,12 @@
 using AttendanceTrackerApp.Data;
 using AttendanceTrackerApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AttendanceTrackerApp.Controllers;
 
+[Authorize]
 public class AttendeeController : Controller
 {
     private readonly AppDbContext _db;
@@ -20,6 +22,7 @@ public class AttendeeController : Controller
         return View(attendees);
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     public IActionResult Create()
     {
         return View();
@@ -27,6 +30,7 @@ public class AttendeeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Create(Attendee model)
     {
         if (!ModelState.IsValid)
